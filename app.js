@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 // this is the code required for us to use fs module
-const fs = require('fs');
+// const fs = require('fs');
 // require to use the code from page-template.js
 /* In order to use functions from one module inside another, we use the related statements module.exports and require. 
 In the source file that has the functions we want to make available to other files, 
@@ -8,12 +8,15 @@ we use module.exports at its bottom. In the destination file(s)
 that we want to receive those exported functions, we put require at the top. */
 const generatePage = require('./src/page-template.js');
 
+// import generate-site to here
+const {writeFile, copyFile} = require('./utils/generate-site.js');
+
 /* inquirer's prompt method can receive an array of objects in its argument, known as the question object.
  The properties of the question object identify the type, name, and question message of this particular question. 
  "Input" was chosen as the type of question because the answer will be a text reply.
  The answer object is returned as a Promise. We'll explore Promises more later, 
  but for now understand that this is a new tool for dealing with asynchronous functions 
- that will return the answer object in the then function */
+ that will return the answer object in the then function */ 
 
  // profile questions
 const promptUser = () => {
@@ -152,11 +155,35 @@ const promptProject = portfolioData => {
 promptUser()
   .then(promptProject)
   .then(portfolioData => {
-    const pageHTML = generatePage(portfolioData);
-
-    fs.writeFile('./index.html', pageHTML, err => {
-      if (err) throw new Error(err);
-
-      console.log('Page created! Check out index.html in this directory to see it!');
-    });
+    return generatePage(portfolioData);
+  })
+  .then(pageHTML => {
+    return writeFile(pageHTML);
+  })
+  .then(writeFileResponse => {
+    console.log(writeFileResponse);
+    return copyFile();
+  })
+  .then(copyFileResponse => {
+    console.log(copyFileResponse);
+  })
+  .catch(err => {
+    console.log(err);
   });
+
+    // fs.writeFile('./dist/index.html', pageHTML, err => {
+    //   if (err) {
+    //     console.log(err);
+    //     return;
+    //   }
+    //   console.log('Page created! Check out index.html in this directory to see it!');
+
+    //   fs.copyFile('./src/style.css', './dist/style.css', err => {
+    //     if (err) {
+    //       console.log(err);
+    //       return;
+    //     }
+    //     console.log('Style sheet copied successfully!');
+    //   });
+    // });
+
