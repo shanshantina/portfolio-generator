@@ -140,7 +140,6 @@ const promptProject = portfolioData => {
     }
   ])
   .then(projectData => {
-    console.log(projectData)
     portfolioData.projects.push(projectData);
     if (projectData.confirmAddProject) {
       return promptProject(portfolioData);
