@@ -1,4 +1,12 @@
 const inquirer = require('inquirer');
+// this is the code required for us to use fs module
+const fs = require('fs');
+// require to use the code from page-template.js
+/* In order to use functions from one module inside another, we use the related statements module.exports and require. 
+In the source file that has the functions we want to make available to other files, 
+we use module.exports at its bottom. In the destination file(s) 
+that we want to receive those exported functions, we put require at the top. */
+const generatePage = require('./src/page-template.js');
 
 /* inquirer's prompt method can receive an array of objects in its argument, known as the question object.
  The properties of the question object identify the type, name, and question message of this particular question. 
@@ -37,9 +45,23 @@ const promptUser = () => {
       }  
     },
     {
+      type: 'confirm',
+      name: 'confirmAbout',
+      message: 'Would you like to enter some information about yourself for an "About" section?',
+      default: true
+    },
+    {
       type: 'input',
       name: 'about',
-      message: 'Provide some information about yourself:'
+      message: 'Provide some information about yourself:',
+      // similar to validate function, only when function pass an object of all of the answers given so far as an object
+      when: ({confirmAbout}) => {
+        if (confirmAbout) {
+          return true;
+        } else {
+          return false;
+        }
+      }
     }    
   ])
 };
@@ -47,23 +69,24 @@ const promptUser = () => {
 
 //project questions
 const promptProject = portfolioData => {
-  // add array inside promptProject instead of using global variables
-  // If there's no 'projects' array property, create one
-  if (!portfolioData.projects) {
-    portfolioData.projects = [];
-  }
   console.log(`
   =================
   Add a New Project
   =================
   `);
+  // add array inside promptProject instead of using global variables
+  // If there's no 'projects' array property, create one
+  if (!portfolioData.projects) {
+    portfolioData.projects = [];
+  }
   return inquirer.prompt([
     {
       type: 'input',
       name: 'name',
       message: 'What is the name of your project?',
-      validate: projectName =>{
-        if (projectName) {
+      // validate if there is an input or not
+      validate: nameInput =>{
+        if (nameInput) {
           return true;
         } else {
           console.log("Please enter your project's name!");
@@ -75,8 +98,8 @@ const promptProject = portfolioData => {
       type: 'input',
       name: 'description',
       message: 'Provide a description of the project (Required)',
-      validate: projectDescription =>{
-        if (projectDescription) {
+      validate: descriptionInput =>{
+        if (descriptionInput) {
           return true;
         } else {
           console.log("Please enter your project's description!");
@@ -94,8 +117,8 @@ const promptProject = portfolioData => {
       type: 'input',
       name: 'link',
       message: 'Enter the GitHub link to your project. (Required)',
-      validate: githubLink =>{
-        if (githubLink) {
+      validate: linkInput =>{
+        if (linkInput) {
           return true;
         } else {
           console.log("Please enter your project's Github link!");
@@ -116,30 +139,23 @@ const promptProject = portfolioData => {
       default: false
     }
   ])
+  .then(projectDate => {
+    portfolioData.projects.push(projectDate);
+    if (projectDate.comfirmAddProject) {
+      return promptProject(portfolioData);
+    } else {
+      return portfolioData;
+    }
+  })
 };
+
 promptUser()
   .then(promptProject)
   .then(portfolioData => {
     console.log(portfolioData);
   });
-  // .then(projectAnswers => console.log(projectAnswers))
-  // .then(projectDate => {
-  //   portfolioData.projects.push(projectDate);
-  //   if (projectDate.comfirmAddProject) {
-  //     return promptProject(portfolioData);
-  //   } else {
-  //     return portfolioData;
-  //   }
-  // });
 
-// // this is the code required for us to use fs module
-// const fs = require('fs');
-// // require to use the code from page-template.js
-// /* In order to use functions from one module inside another, we use the related statements module.exports and require. 
-// In the source file that has the functions we want to make available to other files, 
-// we use module.exports at its bottom. In the destination file(s) 
-// that we want to receive those exported functions, we put require at the top. */
-// const generatePage = require('./src/page-template.js');
+
 
 // const pageHTML = generatePage(name, github);
 
