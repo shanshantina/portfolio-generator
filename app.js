@@ -139,9 +139,10 @@ const promptProject = portfolioData => {
       default: false
     }
   ])
-  .then(projectDate => {
-    portfolioData.projects.push(projectDate);
-    if (projectDate.comfirmAddProject) {
+  .then(projectData => {
+    console.log(projectData)
+    portfolioData.projects.push(projectData);
+    if (projectData.confirmAddProject) {
       return promptProject(portfolioData);
     } else {
       return portfolioData;
